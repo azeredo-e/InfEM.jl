@@ -5,13 +5,13 @@
 CELF lazy-forward seed selection (Leskovec et al., KDD 2007).
 """
 function lazy_forward(
-    g     :: AbstractSimpleWeightedGraph,
-    costs :: Vector{Float64},
-    B     :: Float64,
-    type  :: Symbol;
-    n_iters :: Int = STD_N_ITERS,
-    rng     :: Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
-) :: Vector{Int}
+        g::AbstractSimpleWeightedGraph,
+        costs::Vector{Float64},
+        B::Float64,
+        type::Symbol;
+        n_iters::Int = STD_N_ITERS,
+        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1)
+)::Vector{Int}
     n = nv(g)
     A = Int[]
     sizehint!(A, n)
@@ -19,7 +19,7 @@ function lazy_forward(
     cur = falses(n)
     in_A = falses(n)
     budget_used = 0.0
-    tmp_seeds   = Vector{Int}(undef, n)
+    tmp_seeds = Vector{Int}(undef, n)
     use_uc = (type === :UC)
 
     while true # while ∃ affordable s ∉ A
@@ -54,29 +54,29 @@ function lazy_forward(
                 push!(A, s_star)
                 @inbounds in_A[s_star] = true
                 budget_used += costs[s_star]
-                break 
+                break
             else # else  δs* ← R(A ∪ {s*}) − R(A);  curs* ← true
                 @inbounds tmp_seeds[len_A + 1] = s_star
-                @inbounds δ[s_star] = independent_cascade(g, @view(tmp_seeds[1:len_A + 1]); n_iters, rng) - R_A
+                @inbounds δ[s_star] = independent_cascade(g, @view(tmp_seeds[1:(len_A + 1)]); n_iters, rng) -
+                                      R_A
                 @inbounds cur[s_star] = true
             end
         end
     end # while ∃ affordable candidate (outer loop)
- 
+
     return A
 end
-
 
 """
     celf(g, costs, B, prob; n_iters, rng, verbose) -> NamedTuple
 """
 function celf(
-    g::AbstractSimpleWeightedGraph,
-    costs::Vector{Float64},
-    B::Float64;
-    n_iters::Int = STD_N_ITERS,
-    rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0,1),
-    verbose::Bool = false,
+        g::AbstractSimpleWeightedGraph,
+        costs::Vector{Float64},
+        B::Float64;
+        n_iters::Int = STD_N_ITERS,
+        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
+        verbose::Bool = false
 )::NamedTuple
     verbose && println("CELF ▸ LazyForward [UC] …")
     A_UC = lazy_forward(g, costs, B, :UC; n_iters, rng)
@@ -101,15 +101,15 @@ function celf(
         A_UC = A_UC,
         R_UC = R_UC,
         A_CB = A_CB,
-        R_CB = R_CB,
+        R_CB = R_CB
     )
 end
 function celf(
-    g::AbstractSimpleWeightedGraph,
-    k::Int;
-    n_iters::Int = STD_N_ITERS,
-    rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0,1),
-    verbose::Bool = false,
+        g::AbstractSimpleWeightedGraph,
+        k::Int;
+        n_iters::Int = STD_N_ITERS,
+        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
+        verbose::Bool = false
 )::NamedTuple
     costs = ones(Float64, nv(g))
     return celf(g, costs, Float64(k); n_iters, rng, verbose)

@@ -13,18 +13,18 @@
 `Vector{Int}` of K selected node indices.
 """
 function ranked_replace(
-    g       :: AbstractSimpleWeightedGraph,
-    K       :: Int;
-    n_iters :: Int = STD_N_ITERS,
-    rng     :: Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
-    verbose :: Bool = false,
-) :: Vector{Int}
+        g::AbstractSimpleWeightedGraph,
+        K::Int;
+        n_iters::Int = STD_N_ITERS,
+        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
+        verbose::Bool = false
+)::Vector{Int}
     N = nv(g)
     @assert 1 ≤ K ≤ N "K must satisfy 1 ≤ K ≤ nv(g)  (got K=$K, N=$N)"
 
     single_seed = Vector{Int}(undef, 1) # reused for every [j] solo-spread call
     φ_candidate = Vector{Int}(undef, K) # φ₀ ∪ {j} \ {i}  — always K elements
-    seeds_asc   = Vector{Int}(undef, K) # φ₀ sorted ascending by solo_spread
+    seeds_asc = Vector{Int}(undef, K) # φ₀ sorted ascending by solo_spread
 
     # Compute σ({j}) for every j ∈ V
     solo_spread = Vector{Float64}(undef, N)
@@ -43,14 +43,10 @@ function ranked_replace(
     σ_φ₀ = independent_cascade(g, φ₀; n_iters, rng)
 
     # Sort V\φ₀ descending by solo_spread — computed once
-    candidates = sort(
-        [j for j in 1:N if !in_φ₀[j]];
-        by  = j -> solo_spread[j],
-        rev = true,
-    )
+    candidates = sort([j for j in 1:N if !in_φ₀[j]]; by = j -> solo_spread[j], rev = true)
 
     # for j ∈ V\φ₀ in descending order of σ(j)
-    for j in candidates 
+    for j in candidates
         # Sort φ₀ ascending by solo_spread
         copyto!(seeds_asc, φ₀)
         sort!(seeds_asc; by = i -> solo_spread[i]) # ascending, in-place
@@ -65,7 +61,7 @@ function ranked_replace(
                     φ_candidate[k_idx] = s
                 end
             end
-            φ_candidate[K] = j 
+            φ_candidate[K] = j
             σ_candidate = independent_cascade(g, φ_candidate; n_iters, rng)
 
             if σ_candidate > σ_φ₀
@@ -86,4 +82,3 @@ function ranked_replace(
 
     return φ₀
 end
- 

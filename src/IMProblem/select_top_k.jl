@@ -13,12 +13,12 @@
 `Vector{Int}` of K node indices, sorted by descending solo spread.
 """
 function select_top_k(
-    g       :: AbstractSimpleWeightedGraph,
-    K       :: Int;
-    n_iters :: Int = STD_N_ITERS,
-    rng     :: Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
-    verbose :: Bool = false,
-) :: Vector{Int}
+        g::AbstractSimpleWeightedGraph,
+        K::Int;
+        n_iters::Int = STD_N_ITERS,
+        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
+        verbose::Bool = false
+)::Vector{Int}
     N = nv(g)
     @assert 1 ≤ K ≤ N "K must satisfy 1 ≤ K ≤ nv(g)  (got K=$K, N=$N)"
 
@@ -35,4 +35,3 @@ function select_top_k(
 
     return collect(φ₀)
 end
- 

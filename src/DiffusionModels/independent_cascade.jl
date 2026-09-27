@@ -1,20 +1,26 @@
+struct IndependentCascade{
+    N <: Integer,
+    D <: UnivariateDistribution
+} <: AbstractDiffusionModel
+    n_iters::N
+    rng::D
+end
+function IndependentCascade(; n_iters = STD_N_ITERS, rng = Uniform(0, 1))
+    IndependentCascade(n_iters, rng)
+end
 
-"""
-    independent_cascade(g, seed_nodes, prob; n_iters, rng) -> Float64
-"""
-function independent_cascade(
-    g::AbstractSimpleWeightedGraph,
-    seed_nodes::AbstractVector{Int};
-    n_iters::Int = STD_N_ITERS,
-    rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0,1),
-)::Float64
+function run_diffusion_process(
+        g::G,
+        seed_nodes::VI,
+        diffusion_model::IndependentCascade
+) where {G <: AbstractGraph, VI <: AbstractVector{<:Integer}}
     n = nv(g)
     total_activated = 0
     activated = falses(n)
     frontier = Vector{Int}(undef, n)
     next_frontier = Vector{Int}(undef, n)
 
-    for _ in 1:n_iters
+    for _ in 1:diffusion_model.n_iters
         fill!(activated, false)
         f_len = 0
         n_activated = 0
@@ -30,7 +36,7 @@ function independent_cascade(
             for i in 1:f_len
                 u = frontier[i]
                 for v in outneighbors(g, u)
-                    if !activated[v] && rand(rng) < get_weight(g, u, v)
+                    if !activated[v] && rand(diffusion_model.rng) < get_weight(g, u, v)
                         activated[v] = true
                         nf_len += 1
                         next_frontier[nf_len] = v
@@ -45,5 +51,5 @@ function independent_cascade(
         total_activated += n_activated
     end
 
-    return total_activated / n_iters
+    return total_activated / diffusion_model.n_iters
 end
