@@ -1,3 +1,6 @@
+"""
+*Infem.jl* is a package for Influence Estimation and Maximization in networks.
+"""
 module Infem
 
 using Printf

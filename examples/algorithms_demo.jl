@@ -73,6 +73,9 @@ end
 # ╔═╡ 2ac9afb6-3e82-4773-a058-8bebf031e97f
 solve(im_problem, solver, diffusion)
 
+# ╔═╡ a8da0cdb-27e5-4772-aa57-fef86469a71e
+run_diffusion_process(g, [2], LinearThreshold())
+
 # ╔═╡ 73b22ea9-b0d5-442b-a0d7-15ac119ed0c3
 md"""
 ## Old versions
@@ -1790,6 +1793,7 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─fb5f7063-4cec-4b7f-941d-be6d09c822f3
 # ╠═349bdc2f-5065-421a-9547-5804de0519a1
 # ╠═2ac9afb6-3e82-4773-a058-8bebf031e97f
+# ╠═a8da0cdb-27e5-4772-aa57-fef86469a71e
 # ╟─73b22ea9-b0d5-442b-a0d7-15ac119ed0c3
 # ╟─0a2ff541-582e-4811-9b93-31b957e3561c
 # ╠═d82127b1-50ce-4190-b74e-127fe5e87ca9

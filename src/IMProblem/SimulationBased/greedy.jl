@@ -1,3 +1,14 @@
+"""
+    Greedy{B<:Bool}(verbose::B)}
+
+Defines the Greedy solver for Influence Maximization problems (IMPs). It can be passed to the `solve` function
+to solve an IMP.
+
+It is based on the original greedy algorithm from Kempe et al. (2003).
+
+# Arguments
+- verbose::<:Bool=false: Verbose output.
+"""
 struct Greedy{B <: Bool} <: AbstractIMSolver
     verbose::B
 end
@@ -5,28 +16,13 @@ function Greedy(; verbose = false)
     return Greedy(verbose)
 end
 
-"""
-### Arguments
-- `g`       - Weighted directed graph (`AbstractSimpleWeightedGraph`).
-              Edge weight w(u,v) is the activation probability p_{u,v}.
-- `K`       - Number of seeds to select.
-- `n_iters` - Monte Carlo runs per σ evaluation (default: ).
-- `rng`     - RNG or `Uniform(0,1)` distribution (default: `Uniform(0,1)`).
-- `verbose` - Print per-step diagnostics (default: `false`).
- 
-### Returns
-`NamedTuple` with fields:
-- `solution :: Vector{Int}`    — selected seeds in order of selection
-- `spreads  :: Vector{Float64}`— cumulative σ(φ₀) after each step
-- `elapsed  :: Float64`        — total wall-clock time in seconds
-"""
-
 function solve(
-        im_problem::IM,
-        solver::Greedy,
-        diffusion_model::DiffusionModels.AbstractDiffusionModel
+    im_problem::IM,
+    solver::Greedy,
+    diffusion_model::D
 )::IMSolution where {
-        IM <: AbstractTraditionalIMP
+    IM <: AbstractTraditionalIMP,
+    D <: DiffusionModels.AbstractDiffusionModel
 }
     t0 = time()
 
@@ -85,7 +81,7 @@ function solve(
         im_problem.k,
         diffusion_model,
         S,
-        spreads,
+        last(spreads),
         NamedTuple{(:start, :end, :elapsed)}((t0, time(), time() - t0))
     )
 end

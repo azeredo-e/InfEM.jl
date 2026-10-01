@@ -8,5 +8,5 @@ function run_diffusion_process(
         G <: AbstractGraph,
         VI <: AbstractVector{<:Integer}
 }
-    throw(NotImplementedError("Linear Threshold diffusion model is not implemented yet."))
+    throw("Linear Threshold diffusion model is not implemented yet.")
 end

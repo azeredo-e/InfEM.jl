@@ -9,31 +9,72 @@ using DataStructures
 
 using ..DiffusionModels
 
+"""
+Defines the interface for Influence Maximization Problems (IMPs).
+"""
 abstract type AbstractIMProblem end
+
+"""
+Defines the interface for traditional Influence Maximizations Problems (IMPs).
+"""
 abstract type AbstractTraditionalIMP <: AbstractIMProblem end
+
+"""
+    IMProblem{G <: AbstractGraph, I <: Integer}(g::G, k::I)
+
+Defines a traditional Influence Maximization Problem (IMP). Given a graph `g` and a budget of seed nodes `k`,
+the goal is to find the optimal set of nodes `S` so to maximize the spread of influence in the network.
+The parameter `k` controls the solution as `k ≥ |S|`.
+
+# Fields
+- `g::<:AbstractGraph`: The graph representing the network.
+- `k::<:Integer`: The budget of seed nodes.
+"""
 struct IMProblem{G <: AbstractGraph, I <: Integer} <: AbstractTraditionalIMP
     g::G
     k::I
 end
 
+"""
+Defines the interface for the solutions of Influence Maximization Problems (IMPs).
+"""
 abstract type AbstractIMSolution end
+
+"""
+    IMSolution{G <: AbstractGraph, I <: Integer, F <: AbstractFloat, VF <: AbstractVector{F}}(g::G, k::I, diffusion_model::DiffusionModels.AbstractDiffusionModel, S::Vector{I}, spread::VF, time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}})
+
+Solution for a Influece Maximization Problem (IMP). It is not expected to be used directly by the user, only
+by the appropriate functions from the *Infem.jl* API.
+
+# Fields
+- `g::<:AbstractGraph`: The graph representing the network.
+- `k::<:Integer`: The budget of seed nodes.
+- `diffusion_model::<:AbstractDiffusionModel`: The diffusion model used for generating this result.
+- `S::<:AbstractVector{<:Integer}`: The set of seed nodes selected by the algorithm.
+- `spread::<:AbstractFloat`: The final estimated spread of the algorithm.
+- `time::NamedTuple{(:start, :end, :elapsed), Tuple{<:AbstractFloat, <:AbstractFloat, <:AbstractFloat}}`: The start, end and elapsed time for execution of the algorithm. It uses the `time()` function for measuring.
+"""
 struct IMSolution{
     G <: AbstractGraph,
     I <: Integer,
-    F <: AbstractFloat,
-    VF <: AbstractVector{F}
+    F <: AbstractFloat
 } <: AbstractIMSolution
     g::G
     k::I
     diffusion_model::DiffusionModels.AbstractDiffusionModel
     S::Vector{I}
-    spread::VF
+    spread::F
     time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}}
 end
 
+"""
+Defines the interface for the Influece Maximization Problem (IMP) solver. Custom solvers can be created by
+subtyping `AbstractIMSolver` and implementing the `solve` function for that solver type.
+"""
 abstract type AbstractIMSolver end
 # At each algorithm file there is the type definittion for that solver
 
+include("solve.jl")
 include("SimulationBased/greedy.jl")
 # include("SimulationBased/celf.jl")
 # include("SimulationBased/celfpp.jl")
