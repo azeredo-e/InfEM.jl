@@ -1,18 +1,12 @@
-
-"""
-    lazy_forward(g, costs, B, type; n_iters, rng) -> Vector{Int}
- 
-CELF lazy-forward seed selection (Leskovec et al., KDD 2007).
-"""
 function lazy_forward(
-        g::AbstractSimpleWeightedGraph,
-        costs::Vector{Float64},
-        B::Float64,
-        type::Symbol;
-        n_iters::Int = STD_N_ITERS,
-        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1)
-)::Vector{Int}
-    n = nv(g)
+        im_problem::IM,
+        type::Symbol,
+        diffusion_model::DM;
+)::Vector{Int} where {
+        IM <: AbstractTraditionalIMP,
+        DM <: DiffusionModels.AbstractDiffusionModel
+}
+    n = nv(im_problem.g)
     A = Int[]
     sizehint!(A, n)
     δ = fill(Inf, n)
@@ -23,10 +17,11 @@ function lazy_forward(
     use_uc = (type === :UC)
 
     while true # while ∃ affordable s ∉ A
-        # Quick check for performance: if no candidate is affordable, we can break early without recomputing the candidates list
+        # Quick check for performance: if no candidate is affordable, we can break early without recomputing
+        # the candidates list
         any_candidate = false
         @inbounds for s in 1:n
-            if !in_A[s] && budget_used + costs[s] ≤ B
+            if !in_A[s] && budget_used + im_problem.costs[s] ≤ im_problem.k
                 any_candidate = true
                 break
             end
@@ -34,7 +29,7 @@ function lazy_forward(
         any_candidate || break
 
         fill!(cur, false) # foreach s ∈ V\A do  curs ← false
-        R_A = isempty(A) ? 0.0 : independent_cascade(g, A; n_iters, rng) # Calculate the gain from seed nodes A
+        R_A = isempty(A) ? 0.0 : run_diffusion_process(im_problem.g, A, diffusion_model) # Calculate the gain from seed nodes A
         len_A = length(A)
         copyto!(tmp_seeds, 1, A, 1, len_A)
 
@@ -42,8 +37,8 @@ function lazy_forward(
             s_star = 0
             best_p = -Inf
             @inbounds for s in 1:n
-                (in_A[s] || budget_used + costs[s] > B) && continue
-                p = use_uc ? δ[s] : δ[s] / costs[s]
+                (in_A[s] || budget_used + im_problem.costs[s] > im_problem.k) && continue
+                p = use_uc ? δ[s] : δ[s] / im_problem.costs[s]
                 if p > best_p
                     best_p = p
                     s_star = s
@@ -53,12 +48,15 @@ function lazy_forward(
             if @inbounds cur[s_star]  # if curs*  then  A ← A ∪ {s*};  break
                 push!(A, s_star)
                 @inbounds in_A[s_star] = true
-                budget_used += costs[s_star]
+                budget_used += im_problem.costs[s_star]
                 break
             else # else  δs* ← R(A ∪ {s*}) − R(A);  curs* ← true
                 @inbounds tmp_seeds[len_A + 1] = s_star
-                @inbounds δ[s_star] = independent_cascade(g, @view(tmp_seeds[1:(len_A + 1)]); n_iters, rng) -
-                                      R_A
+                @inbounds δ[s_star] = run_diffusion_process(
+                    im_problem.g,
+                    @view(tmp_seeds[1:(len_A + 1)]),
+                    diffusion_model
+                ) - R_A
                 @inbounds cur[s_star] = true
             end
         end
@@ -68,23 +66,57 @@ function lazy_forward(
 end
 
 """
-    celf(g, costs, B, prob; n_iters, rng, verbose) -> NamedTuple
-"""
-function celf(
-        g::AbstractSimpleWeightedGraph,
-        costs::Vector{Float64},
-        B::Float64;
-        n_iters::Int = STD_N_ITERS,
-        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
-        verbose::Bool = false
-)::NamedTuple
-    verbose && println("CELF ▸ LazyForward [UC] …")
-    A_UC = lazy_forward(g, costs, B, :UC; n_iters, rng)
-    R_UC = isempty(A_UC) ? 0.0 : independent_cascade(g, A_UC; n_iters, rng)
+    CELF{B <: Bool}(verbose::B = false)
 
-    verbose && println("CELF ▸ LazyForward [CB] …")
-    A_CB = lazy_forward(g, costs, B, :CB; n_iters, rng)
-    R_CB = isempty(A_CB) ? 0.0 : independent_cascade(g, A_CB; n_iters, rng)
+Defines the CELF solver for Influence Maximization problems (IMPs). It can be passed to the `solve` function
+to solve an IMP.
+
+CELF is an evolution on the *Greedy* algorithm, it treats our number `k` as a budget and allows node to have
+different costs.
+
+When running `solve` the optional `solution` field of the returned `IMSolution` will contain a `NamedTuple`
+with the following fields:
+- `winner`: The winner of the two strategies, either `:UC` or `:CB`.
+- `A_UC`: The set of seed nodes selected by the *Uniform Cost* strategy.
+- `R_UC`: The final estimated spread of the *Uniform Cost* strategy.
+- `A_CB`: The set of seed nodes selected by the *Cost Benefit* strategy.
+- `R_CB`: The final estimated spread of the *Cost Benefit* strategy.
+
+Based on the original CELF algorithm from Leskovec et al. (2007).
+
+# Arguments
+- verbose::<:Bool=false: Verbose output.
+"""
+struct CELF{B <: Bool} <: AbstractIMSolver
+    verbose::B
+end
+function CELF(; verbose = false)
+    return CELF(verbose)
+end
+
+function solve(
+        im_problem::IM,
+        solver::CELF,
+        diffusion_model::D
+)::IMSolution where {
+        IM <: AbstractTraditionalIMP,
+        D <: DiffusionModels.AbstractDiffusionModel
+}
+    t0 = time()
+    verbose && println("CELF ▸ LazyForward [UC] …")
+    A_UC = lazy_forward(im_problem, :UC, diffusion_model)
+    R_UC = isempty(A_UC) ? 0.0 : run_diffusion_process(im_problem.g, A_UC, diffusion_model)
+
+    # Check if all costs are 1.0, if so, we can skip the CB strategy because it will be the same as UC
+    if all(solver.costs .== 1.0)
+        verbose && println("CELF ▸ LazyForward [CB] …")
+        A_CB = lazy_forward(im_problem, :CB, diffusion_model)
+        R_CB = isempty(A_CB) ? 0.0 :
+               run_diffusion_process(im_problem.g, A_CB, diffusion_model)
+    else
+        A_CB = Int[]
+        R_CB = 0.0
+    end
 
     solution, spread, winner = R_UC ≥ R_CB ? (A_UC, R_UC, :UC) : (A_CB, R_CB, :CB)
 
@@ -94,23 +126,13 @@ function celf(
         @printf("  Winner: %s\n", winner)
     end
 
-    return (
-        solution = solution,
-        spread = spread,
-        winner = winner,
-        A_UC = A_UC,
-        R_UC = R_UC,
-        A_CB = A_CB,
-        R_CB = R_CB
+    return IMSolution(
+        im_problem.g,
+        im_problem.k,
+        diffusion_model,
+        solution,
+        spread,
+        NamedTuple{(:start, :end, :elapsed)}((t0, time(), time() - t0)),
+        (winner = winner, A_UC = A_UC, R_UC = R_UC, A_CB = A_CB, R_CB = R_CB)
     )
-end
-function celf(
-        g::AbstractSimpleWeightedGraph,
-        k::Int;
-        n_iters::Int = STD_N_ITERS,
-        rng::Union{AbstractRNG, UnivariateDistribution} = Uniform(0, 1),
-        verbose::Bool = false
-)::NamedTuple
-    costs = ones(Float64, nv(g))
-    return celf(g, costs, Float64(k); n_iters, rng, verbose)
 end

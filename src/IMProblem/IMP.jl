@@ -26,14 +26,25 @@ Defines a traditional Influence Maximization Problem (IMP). Given a graph `g` an
 the goal is to find the optimal set of nodes `S` so to maximize the spread of influence in the network.
 The parameter `k` controls the solution as `k ≥ |S|`.
 
+The parameter `costs` controls the individual cost of influence for each node in the network. In the passed
+`Vector` each index match the cost of the node with the same index. This is used in some solvers. If all nodes
+have the same cost, a vector of ones can be passed to this parameter.
+
 # Fields
 - `g::<:AbstractGraph`: The graph representing the network.
 - `k::<:Integer`: The budget of seed nodes.
+- `costs::<:AbstractVector{<:AbstractFloat}`: The costs of each node in the network.
 """
-struct IMProblem{G <: AbstractGraph, I <: Integer} <: AbstractTraditionalIMP
+struct IMProblem{
+    G <: AbstractGraph,
+    I <: Integer,
+    VF <: AbstractVector{<:AbstractFloat}
+} <: AbstractTraditionalIMP
     g::G
     k::I
+    costs::VF
 end
+#TODO: preciso checar se eu posso aplicar isso em todos os solvers
 
 """
 Defines the interface for the solutions of Influence Maximization Problems (IMPs).
@@ -41,7 +52,7 @@ Defines the interface for the solutions of Influence Maximization Problems (IMPs
 abstract type AbstractIMSolution end
 
 """
-    IMSolution{G <: AbstractGraph, I <: Integer, F <: AbstractFloat, VF <: AbstractVector{F}}(g::G, k::I, diffusion_model::DiffusionModels.AbstractDiffusionModel, S::Vector{I}, spread::VF, time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}})
+    IMSolution{G <: AbstractGraph, I <: Integer, F <: AbstractFloat, VI <: AbstractVector{<:AbstractFloat}}(g::G, k::I, diffusion_model::DiffusionModels.AbstractDiffusionModel, S::VI, spread::F, time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}})
 
 Solution for a Influece Maximization Problem (IMP). It is not expected to be used directly by the user, only
 by the appropriate functions from the *Infem.jl* API.
@@ -52,19 +63,24 @@ by the appropriate functions from the *Infem.jl* API.
 - `diffusion_model::<:AbstractDiffusionModel`: The diffusion model used for generating this result.
 - `S::<:AbstractVector{<:Integer}`: The set of seed nodes selected by the algorithm.
 - `spread::<:AbstractFloat`: The final estimated spread of the algorithm.
-- `time::NamedTuple{(:start, :end, :elapsed), Tuple{<:AbstractFloat, <:AbstractFloat, <:AbstractFloat}}`: The start, end and elapsed time for execution of the algorithm. It uses the `time()` function for measuring.
+- `time::NamedTuple{(:start, :end, :elapsed), Tuple{<:AbstractFloat, <:AbstractFloat, <:AbstractFloat}}`: The
+start, end and elapsed time for execution of the algorithm. It uses the `time()` function for measuring.
+- `solution::NamedTuple`: Other information computed by the algorithm. It is solver specific so no specific 
+fields are guaranteed to be present. If no additional information is computed, this field will be `nothing`.
 """
 struct IMSolution{
     G <: AbstractGraph,
     I <: Integer,
-    F <: AbstractFloat
+    F <: AbstractFloat,
+    VI <: AbstractVector{<:Integer}
 } <: AbstractIMSolution
     g::G
     k::I
     diffusion_model::DiffusionModels.AbstractDiffusionModel
-    S::Vector{I}
+    S::VI
     spread::F
     time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}}
+    solution::Union{NamedTuple, Nothing}
 end
 
 """
@@ -76,7 +92,7 @@ abstract type AbstractIMSolver end
 
 include("solve.jl")
 include("SimulationBased/greedy.jl")
-# include("SimulationBased/celf.jl")
+include("SimulationBased/celf.jl")
 # include("SimulationBased/celfpp.jl")
 
 export

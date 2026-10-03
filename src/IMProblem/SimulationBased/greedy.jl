@@ -4,7 +4,7 @@
 Defines the Greedy solver for Influence Maximization problems (IMPs). It can be passed to the `solve` function
 to solve an IMP.
 
-It is based on the original greedy algorithm from Kempe et al. (2003).
+Based on the original greedy algorithm from Kempe et al. (2003).
 
 # Arguments
 - verbose::<:Bool=false: Verbose output.
@@ -17,12 +17,12 @@ function Greedy(; verbose = false)
 end
 
 function solve(
-    im_problem::IM,
-    solver::Greedy,
-    diffusion_model::D
+        im_problem::IM,
+        solver::Greedy,
+        diffusion_model::D
 )::IMSolution where {
-    IM <: AbstractTraditionalIMP,
-    D <: DiffusionModels.AbstractDiffusionModel
+        IM <: AbstractTraditionalIMP,
+        D <: DiffusionModels.AbstractDiffusionModel
 }
     t0 = time()
 
@@ -82,6 +82,7 @@ function solve(
         diffusion_model,
         S,
         last(spreads),
-        NamedTuple{(:start, :end, :elapsed)}((t0, time(), time() - t0))
+        NamedTuple{(:start, :end, :elapsed)}((t0, time(), time() - t0)),
+        nothing
     )
 end
