@@ -95,7 +95,7 @@ abstract type AbstractIMSolver end
 include("solve.jl")
 include("SimulationBased/greedy.jl")
 include("SimulationBased/celf.jl")
-# include("SimulationBased/celfpp.jl")
+include("SimulationBased/celfpp.jl")
 
 export
        IMProblem,
@@ -106,6 +106,7 @@ export
        AbstractIMSolver,
        Greedy,
        CELF,
+       CELFpp,
        solve
 
 end # module IMP

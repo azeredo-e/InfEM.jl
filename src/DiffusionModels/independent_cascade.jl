@@ -10,9 +10,9 @@ function IndependentCascade(; n_iters = STD_N_ITERS, rng = Uniform(0, 1))
 end
 
 function run_diffusion_process(
-        g::G,
-        seed_nodes::VI,
-        diffusion_model::IndependentCascade
+    g::G,
+    seed_nodes::VI,
+    diffusion_model::IndependentCascade
 ) where {G <: AbstractGraph, VI <: AbstractVector{<:Integer}}
     n = nv(g)
     total_activated = 0

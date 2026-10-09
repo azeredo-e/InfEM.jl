@@ -96,12 +96,12 @@ function CELF(; verbose = false)
 end
 
 function solve(
-        im_problem::IM,
-        solver::CELF,
-        diffusion_model::D
+    im_problem::IM,
+    solver::CELF,
+    diffusion_model::D
 )::IMSolution where {
-        IM <: AbstractTraditionalIMP,
-        D <: DiffusionModels.AbstractDiffusionModel
+    IM <: AbstractTraditionalIMP,
+    D <: DiffusionModels.AbstractDiffusionModel
 }
     t0 = time()
     solver.verbose && println("CELF ▸ LazyForward [UC] …")
