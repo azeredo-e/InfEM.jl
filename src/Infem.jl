@@ -24,7 +24,7 @@ export # Problem and solution definitions
        AbstractTraditionalIMP,
        AbstractIMSolution,
        IMSolution
-export AbstractIMSolver, Greedy # IM models
+export AbstractIMSolver, Greedy, CELF # IM models
 export IndependentCascade, LinearThreshold # Diffusion processes
 export run_diffusion_process, solve # Solve functions
 

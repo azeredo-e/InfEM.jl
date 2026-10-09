@@ -26,14 +26,14 @@ Defines a traditional Influence Maximization Problem (IMP). Given a graph `g` an
 the goal is to find the optimal set of nodes `S` so to maximize the spread of influence in the network.
 The parameter `k` controls the solution as `k ≥ |S|`.
 
-The parameter `costs` controls the individual cost of influence for each node in the network. In the passed
+The optional parameter `costs` controls the individual cost of influence for each node in the network. In the passed
 `Vector` each index match the cost of the node with the same index. This is used in some solvers. If all nodes
 have the same cost, a vector of ones can be passed to this parameter.
 
 # Fields
 - `g::<:AbstractGraph`: The graph representing the network.
 - `k::<:Integer`: The budget of seed nodes.
-- `costs::<:AbstractVector{<:AbstractFloat}`: The costs of each node in the network.
+- `costs::<:AbstractVector{<:AbstractFloat}`=|V|: The costs of each node in the network.
 """
 struct IMProblem{
     G <: AbstractGraph,
@@ -44,7 +44,9 @@ struct IMProblem{
     k::I
     costs::VF
 end
-#TODO: preciso checar se eu posso aplicar isso em todos os solvers
+function IMProblem(g, k)
+    return IMProblem(g, k, ones(Float64, nv(g)))
+end
 
 """
 Defines the interface for the solutions of Influence Maximization Problems (IMPs).
@@ -103,6 +105,7 @@ export
        IMSolution,
        AbstractIMSolver,
        Greedy,
+       CELF,
        solve
 
 end # module IMP

@@ -49,6 +49,7 @@ function lazy_forward(
                 push!(A, s_star)
                 @inbounds in_A[s_star] = true
                 budget_used += im_problem.costs[s_star]
+                # budget_used += 1
                 break
             else # else  δs* ← R(A ∪ {s*}) − R(A);  curs* ← true
                 @inbounds tmp_seeds[len_A + 1] = s_star
@@ -103,13 +104,14 @@ function solve(
         D <: DiffusionModels.AbstractDiffusionModel
 }
     t0 = time()
-    verbose && println("CELF ▸ LazyForward [UC] …")
+    solver.verbose && println("CELF ▸ LazyForward [UC] …")
     A_UC = lazy_forward(im_problem, :UC, diffusion_model)
     R_UC = isempty(A_UC) ? 0.0 : run_diffusion_process(im_problem.g, A_UC, diffusion_model)
 
+    # When budgeted algorithms are implemented this will 
     # Check if all costs are 1.0, if so, we can skip the CB strategy because it will be the same as UC
-    if all(solver.costs .== 1.0)
-        verbose && println("CELF ▸ LazyForward [CB] …")
+    if all(im_problem.costs .== 1.0)
+        solver.verbose && println("CELF ▸ LazyForward [CB] …")
         A_CB = lazy_forward(im_problem, :CB, diffusion_model)
         R_CB = isempty(A_CB) ? 0.0 :
                run_diffusion_process(im_problem.g, A_CB, diffusion_model)
@@ -120,10 +122,10 @@ function solve(
 
     solution, spread, winner = R_UC ≥ R_CB ? (A_UC, R_UC, :UC) : (A_CB, R_CB, :CB)
 
-    if verbose
+    if solver.verbose
         @printf("  UC → nodes %-20s  spread = %.3f\n", string(A_UC), R_UC)
-        @printf("  CB → nodes %-20s  spread = %.3f\n", string(A_CB), R_CB)
-        @printf("  Winner: %s\n", winner)
+        # @printf("  CB → nodes %-20s  spread = %.3f\n", string(A_CB), R_CB)
+        # @printf("  Winner: %s\n", winner)
     end
 
     return IMSolution(
