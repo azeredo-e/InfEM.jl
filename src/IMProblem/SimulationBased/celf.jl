@@ -29,7 +29,7 @@ function lazy_forward(
         any_candidate || break
 
         fill!(cur, false) # foreach s ∈ V\A do  curs ← false
-        R_A = isempty(A) ? 0.0 : run_diffusion_process(im_problem.g, A, diffusion_model) # Calculate the gain from seed nodes A
+        R_A = isempty(A) ? 0.0 : run_diffusion_process(im_problem.g, A, diffusion_model).average_spread
         len_A = length(A)
         copyto!(tmp_seeds, 1, A, 1, len_A)
 
@@ -57,7 +57,7 @@ function lazy_forward(
                     im_problem.g,
                     @view(tmp_seeds[1:(len_A + 1)]),
                     diffusion_model
-                ) - R_A
+                ).average_spread - R_A
                 @inbounds cur[s_star] = true
             end
         end
@@ -106,15 +106,22 @@ function solve(
     t0 = time()
     solver.verbose && println("CELF ▸ LazyForward [UC] …")
     A_UC = lazy_forward(im_problem, :UC, diffusion_model)
-    R_UC = isempty(A_UC) ? 0.0 : run_diffusion_process(im_problem.g, A_UC, diffusion_model)
+    R_UC = (
+        isempty(A_UC) ?
+        0.0 :
+        run_diffusion_process(im_problem.g, A_UC, diffusion_model).average_spread
+    )
 
     # When budgeted algorithms are implemented this will 
     # Check if all costs are 1.0, if so, we can skip the CB strategy because it will be the same as UC
     if all(im_problem.costs .== 1.0)
         solver.verbose && println("CELF ▸ LazyForward [CB] …")
         A_CB = lazy_forward(im_problem, :CB, diffusion_model)
-        R_CB = isempty(A_CB) ? 0.0 :
-               run_diffusion_process(im_problem.g, A_CB, diffusion_model)
+        R_CB = (
+            isempty(A_CB) ?
+            0.0 :
+            run_diffusion_process(im_problem.g, A_CB, diffusion_model).average_spread
+        )
     else
         A_CB = Int[]
         R_CB = 0.0

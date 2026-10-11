@@ -5,7 +5,7 @@
 Defines the CELF++ solver for Influence Maximization problems (IMPs). It can be passed to the `solve` function
 to solve an IMP.
 
-CELF++ is an evolution on the *CELF* algorithm. TOTO: Add more details about CELF++ and how it differs from CELF.
+CELF++ is an evolution on the *CELF* algorithm.
 
 When running `solve` the optional `solution` field of the returned `IMSolution` will contain a `NamedTuple`
 with the following fields:
@@ -59,7 +59,7 @@ function solve(
     for u in 1:n
         # mg1[u] = σ({u})
         single_seed[1] = u
-        mg1[u] = run_diffusion_process(im_problem.g, single_seed, diffusion_model)
+        mg1[u] = run_diffusion_process(im_problem.g, single_seed, diffusion_model).average_spread
         lookups += 1
 
         prev_best[u] = cur_best # u.prev_best = cur_best 
@@ -73,7 +73,7 @@ function solve(
                 im_problem.g,
                 pair_buf,
                 diffusion_model
-            ) - mg1[cur_best]
+            ).average_spread - mg1[cur_best]
             lookups += 1
         end
 
@@ -114,7 +114,7 @@ function solve(
                 len_S_cache = len_S
             end
             if !spread_S_valid
-                spread_S = run_diffusion_process(im_problem.g, S, diffusion_model)
+                spread_S = run_diffusion_process(im_problem.g, S, diffusion_model).average_spread
                 spread_S_valid = true
                 lookups += 1
             end
@@ -124,7 +124,7 @@ function solve(
                 im_problem.g,
                 @view(tmp_seeds[1:(len_S + 1)]),
                 diffusion_model
-            ) - spread_S
+            ).average_spread - spread_S
             lookups += 1
 
             prev_best[u] = cur_best # u.prev_best = cur_best
@@ -138,7 +138,7 @@ function solve(
                     im_problem.g,
                     @view(tmp_seeds[1:(len_S + 1)]),
                     diffusion_model
-                )
+                ).average_spread
 
                 # σ(S ∪ {u, cur_best}): write u at len_S+1, cur_best at len_S+2
                 @inbounds tmp_seeds[len_S + 1] = u
@@ -147,7 +147,7 @@ function solve(
                     im_problem.g,
                     @view(tmp_seeds[1:(len_S + 2)]),
                     diffusion_model
-                ) - spread_S_cb
+                ).average_spread - spread_S_cb
                 lookups += 2
             end
         end

@@ -41,8 +41,11 @@ function solve(
 
     for q in 1:im_problem.k # for q = 1 to K
         len_S = length(S)
-        spread_S = len_S == 0 ? 0.0 :
-                   run_diffusion_process(im_problem.g, S, diffusion_model)
+        spread_S = (
+            len_S == 0 ?
+            0.0 :
+            run_diffusion_process(im_problem.g, S, diffusion_model).average_spread
+        )
         copyto!(tmp_seeds, 1, S, 1, len_S)
         best_node = 0
         best_gain = -Inf
@@ -56,7 +59,7 @@ function solve(
                 im_problem.g,
                 @view(tmp_seeds[1:(len_S + 1)]),
                 diffusion_model
-            ) - spread_S
+            ).average_spread - spread_S
 
             if gain > best_gain
                 best_gain = gain
