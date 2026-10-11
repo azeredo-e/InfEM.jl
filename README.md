@@ -4,6 +4,14 @@
 
 Influence Estimation and Maximizations algorithms.
 
-Selection of influence estimation and maximization algortihms. Currently the implemented algorithsm are as followed:
+Selection of influence estimation and maximization algortihms. Currently the implemented IM algorithms are as followed:
 
-- Greedy
+- Greedy (Kempe, et al., 2003)
+- CELF (Leskovec, et al., 2007)
+- CELF++ (Goyal, et al. 2011)
+
+And the IE algorithms are:
+
+- LIPN (Wang, et al., 2025)
+
+The `bibliography.bib` file contains all the papers used for this project.

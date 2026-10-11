@@ -51,86 +51,107 @@ begin
         fontsize=8,
         nodeshape=:circle
     )
+end;
+
+# ╔═╡ 8eae7906-7252-4ff9-9f18-cf02f78a494c
+begin
+    n = 100
+    g_em = erdos_renyi(n, 0.05)
+    wg_em = SimpleWeightedDiGraph(g_em)
+    for e in edges(wg_em)
+        src, dst = Graphs.src(e), Graphs.dst(e)
+        wg_em.weights[src, dst] = Normal(0.3, 0.05) |> rand
+    end
 end
+
+# ╔═╡ 09fdf7e8-29de-45a4-8181-4f6d56b981a3
+g_em
 
 # ╔═╡ cf2b9dee-7255-4664-ac2c-4ef86aabf240
 md"""
 ## Algorithms
 """
 
+# ╔═╡ ef9b3158-701b-4348-b93a-2182ca8f12be
+md"""
+### LIPN
+"""
+
+# ╔═╡ ca99eca0-375c-497f-bd6d-79f877ab8ce3
+begin
+    ic_em = IndependentCascade(n_iters=40)
+    ic_em_res = run_diffusion_process(wg_em, sample(1:n, 5), ic_em)
+end
+
+# ╔═╡ 0664844d-2396-490b-b898-70e8c2135643
+begin
+    iep_lipn = IEProblem(g_em, ic_em_res)
+    lipn = LIPN()
+end
+
+# ╔═╡ 99027bf5-4f13-4706-9a15-753572456771
+solve(iep_lipn, lipn)
+
+# ╔═╡ e432577b-4640-4c52-88d9-08494d8a14a7
+md"""
+### Diffusion IC
+"""
+
+# ╔═╡ dde5a596-84e5-4914-ae4b-881e64a41a50
+begin
+    diffusion_ic = IndependentCascade(n_iters=10)
+    run_diffusion_process(g, [4,5], diffusion_ic)
+end
+
 # ╔═╡ fb5f7063-4cec-4b7f-941d-be6d09c822f3
 md"""
-## Greedy
+### Greedy
 """
 
 # ╔═╡ 349bdc2f-5065-421a-9547-5804de0519a1
 begin
-    im_problem = IMProblem(g, 2)
-    diffusion = IndependentCascade(n_iters=N_ITERS)
-    solver = Greedy(verbose=true)
+    im_problem_greedy = IMProblem(g, 2)
+    diffusion_greedy = IndependentCascade(n_iters=N_ITERS)
+    solver_greedy = Greedy(verbose=true)
 end
 
 # ╔═╡ 2ac9afb6-3e82-4773-a058-8bebf031e97f
-solve(im_problem, solver, diffusion)
+solve(im_problem_greedy, solver_greedy, diffusion_greedy)
 
-# ╔═╡ a8da0cdb-27e5-4772-aa57-fef86469a71e
-run_diffusion_process(g, [2], LinearThreshold())
+# ╔═╡ 00730f92-3f97-4052-8771-411015cfbbd9
+md"""
+### CELF
+"""
+
+# ╔═╡ 82f206b0-5cee-4ff0-b2d0-7c2ec05a752f
+begin
+    im_problem_celf = IMProblem(g, 2)
+    diffusion_celf = IndependentCascade(n_iters=N_ITERS)
+    solver_celf = CELF(verbose=true)
+end
+
+# ╔═╡ f6280511-2075-4ba5-981c-d3ddf2325b4c
+solve(im_problem_celf, solver_celf, diffusion_celf)
+
+# ╔═╡ c1516447-4b01-41aa-8a9e-c5b91c853c70
+md"""
+### CELF++
+"""
+
+# ╔═╡ 4867bd65-d487-4807-ba17-0827fbe4f312
+begin
+    im_problem_celfpp = IMProblem(g, 2)
+    diffusion_celfpp = IndependentCascade(n_iters=N_ITERS)
+    solver_celfpp = CELFpp(verbose=true)
+end
+
+# ╔═╡ 480cf7b8-b3e1-4f61-a148-1c0002b44105
+solve(im_problem_celfpp, solver_celfpp, diffusion_celfpp)
 
 # ╔═╡ 73b22ea9-b0d5-442b-a0d7-15ac119ed0c3
 md"""
 ## Old versions
 """
-
-# ╔═╡ 0a2ff541-582e-4811-9b93-31b957e3561c
-md"""
-### CELF
-"""
-
-# ╔═╡ d82127b1-50ce-4190-b74e-127fe5e87ca9
-# ╠═╡ disabled = true
-#=╠═╡
-celf(g, 2; n_iters=N_ITERS, verbose = true)
-  ╠═╡ =#
-
-# ╔═╡ ba113cf5-90ee-47a2-97b1-b301aaa9ced1
-# ╠═╡ disabled = true
-#=╠═╡
-@benchmark celf(g, 2; n_iters=N_ITERS)
-  ╠═╡ =#
-
-# ╔═╡ be86dfaa-52d5-4641-83bc-4f6fd85ac8d7
-md"""
-### CELF++
-"""
-
-# ╔═╡ a9f7d338-7901-4047-974a-e55f08b0e690
-# ╠═╡ disabled = true
-#=╠═╡
-celfpp(g, 2; n_iters=N_ITERS)
-  ╠═╡ =#
-
-# ╔═╡ e1b0f36f-a075-4634-86b4-9a75bb1443a8
-# ╠═╡ disabled = true
-#=╠═╡
-@benchmark celfpp(g, 2; n_iters=N_ITERS, show_results=false)
-  ╠═╡ =#
-
-# ╔═╡ 9480b632-fe3b-4256-9a27-c550ebe4ca88
-md"""
-### Greedy
-"""
-
-# ╔═╡ dd5e729d-6474-4664-a31a-2348c430f934
-# ╠═╡ disabled = true
-#=╠═╡
-greedy(g, 2; n_iters=N_ITERS)
-  ╠═╡ =#
-
-# ╔═╡ 68f2bceb-6217-484e-89f7-7bff78832eaf
-# ╠═╡ disabled = true
-#=╠═╡
-@benchmark greedy(g, 2; n_iters=N_ITERS)
-  ╠═╡ =#
 
 # ╔═╡ b59beaac-801f-486a-884e-c97786bc0889
 md"""
@@ -193,7 +214,7 @@ SimpleWeightedGraphs = "~1.5.1"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.13.0"
+julia_version = "1.13.1"
 manifest_format = "2.1"
 project_hash = "5b9c9ff688952e97c4574986bf97a89e55196277"
 
@@ -785,7 +806,7 @@ version = "1.9.1+0"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl", "OpenSSL_jll", "Zlib_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.11.103+0"
+version = "1.11.104+0"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -1788,22 +1809,26 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─fab87f07-03da-4fe0-a61d-242322684a0e
 # ╠═f7483e70-651d-11f1-9d60-9bc10df94b9d
 # ╠═6e735ba2-6fde-48a1-be72-76425f058821
-# ╠═f996cbad-56a4-43c9-8b99-010b12609a70
+# ╟─f996cbad-56a4-43c9-8b99-010b12609a70
+# ╠═8eae7906-7252-4ff9-9f18-cf02f78a494c
+# ╠═09fdf7e8-29de-45a4-8181-4f6d56b981a3
 # ╟─cf2b9dee-7255-4664-ac2c-4ef86aabf240
-# ╟─fb5f7063-4cec-4b7f-941d-be6d09c822f3
+# ╟─ef9b3158-701b-4348-b93a-2182ca8f12be
+# ╠═ca99eca0-375c-497f-bd6d-79f877ab8ce3
+# ╠═0664844d-2396-490b-b898-70e8c2135643
+# ╠═99027bf5-4f13-4706-9a15-753572456771
+# ╟─e432577b-4640-4c52-88d9-08494d8a14a7
+# ╠═dde5a596-84e5-4914-ae4b-881e64a41a50
+# ╠═fb5f7063-4cec-4b7f-941d-be6d09c822f3
 # ╠═349bdc2f-5065-421a-9547-5804de0519a1
 # ╠═2ac9afb6-3e82-4773-a058-8bebf031e97f
-# ╠═a8da0cdb-27e5-4772-aa57-fef86469a71e
+# ╠═00730f92-3f97-4052-8771-411015cfbbd9
+# ╠═82f206b0-5cee-4ff0-b2d0-7c2ec05a752f
+# ╠═f6280511-2075-4ba5-981c-d3ddf2325b4c
+# ╠═c1516447-4b01-41aa-8a9e-c5b91c853c70
+# ╠═4867bd65-d487-4807-ba17-0827fbe4f312
+# ╠═480cf7b8-b3e1-4f61-a148-1c0002b44105
 # ╟─73b22ea9-b0d5-442b-a0d7-15ac119ed0c3
-# ╟─0a2ff541-582e-4811-9b93-31b957e3561c
-# ╠═d82127b1-50ce-4190-b74e-127fe5e87ca9
-# ╠═ba113cf5-90ee-47a2-97b1-b301aaa9ced1
-# ╟─be86dfaa-52d5-4641-83bc-4f6fd85ac8d7
-# ╠═a9f7d338-7901-4047-974a-e55f08b0e690
-# ╠═e1b0f36f-a075-4634-86b4-9a75bb1443a8
-# ╟─9480b632-fe3b-4256-9a27-c550ebe4ca88
-# ╠═dd5e729d-6474-4664-a31a-2348c430f934
-# ╠═68f2bceb-6217-484e-89f7-7bff78832eaf
 # ╟─b59beaac-801f-486a-884e-c97786bc0889
 # ╠═0429a851-ad6e-4585-9c20-22bc02ae6f83
 # ╠═22280e77-14ea-4458-8039-d38c6680c9f3
