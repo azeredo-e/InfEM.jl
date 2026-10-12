@@ -26,10 +26,10 @@ include("independent_cascade.jl")
 include("linear_threshold.jl")
 
 export
-    AbstractDiffusionModel,
-    DiffusionResult,
-    IndependentCascade,
-    LinearThreshold,
-    run_diffusion_process
+       AbstractDiffusionModel,
+       DiffusionResult,
+       IndependentCascade,
+       LinearThreshold,
+       run_diffusion_process
 
 end # module DiffusionModels

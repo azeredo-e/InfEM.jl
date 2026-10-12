@@ -84,18 +84,18 @@ struct LIPN{
     verbose::Bool
 end
 function LIPN(;
-    e_threshold::F = 0.5, # For LIPN
-    em_tol::F = 1e-6,
-    em_maxiter::I = 100,
-    sa_temp_ini::N = 100, # For SA
-    sa_temp_final::N = 1,
-    sa_epochs::I = 200,
-    sa_temp_decay::N = 8,
-    verbose::Bool = false
+        e_threshold::F = 0.5, # For LIPN
+        em_tol::F = 1e-6,
+        em_maxiter::I = 100,
+        sa_temp_ini::N = 100, # For SA
+        sa_temp_final::N = 1,
+        sa_epochs::I = 200,
+        sa_temp_decay::N = 8,
+        verbose::Bool = false
 ) where {
-    F <: AbstractFloat,
-    N <: Number,
-    I <: Integer
+        F <: AbstractFloat,
+        N <: Number,
+        I <: Integer
 }
     LIPN(
         e_threshold,
@@ -110,9 +110,9 @@ function LIPN(;
 end
 
 function _log_likelihood(
-    P::Vector{Float64},
-    incoming::Vector{Vector{Tuple{Int64, Int64}}},
-    diffusion_res::BitMatrix
+        P::Vector{Float64},
+        incoming::Vector{Vector{Tuple{Int64, Int64}}},
+        diffusion_res::BitMatrix
 )
     n, D_n = size(diffusion_res)
     ll = 0.0
@@ -143,10 +143,10 @@ function _log_likelihood(
 end
 
 function _combined_temperature_sa(
-    P_init::Vector{Float64},
-    incoming::Vector{Vector{Tuple{Int64, Int64}}},
-    diffusion_res::BitMatrix;
-    params::LIPN # Solver defined params
+        P_init::Vector{Float64},
+        incoming::Vector{Vector{Tuple{Int64, Int64}}},
+        diffusion_res::BitMatrix;
+        params::LIPN # Solver defined params
 )
     f(P) = -_log_likelihood(P, incoming, diffusion_res)   # minimize negative log-lik
 
@@ -201,6 +201,7 @@ function _e_step(
     # l -> i -> [(j, k, γ), ...] :: for each neighbor of i for each diffusion
     γ = [Dict{Int, Vector{Tuple{Int, Int, Float64}}}() for _ in 1:D_n]
     for l in 1:D_n, i in 1:n
+
         diffusion_res[i, l] == 1 || continue
         prod_q = 1.0
         for (j, k) in incoming[i] # Its the same principle as when calculating the log likelihood
@@ -218,9 +219,9 @@ function _e_step(
 end
 
 function _m_step(
-    γ::Vector{Dict{Int, Vector{Tuple{Int, Int, Float64}}}},
-    P::Vector{Float64},
-    D_n::Integer
+        γ::Vector{Dict{Int, Vector{Tuple{Int, Int, Float64}}}},
+        P::Vector{Float64},
+        D_n::Integer
 )
     sum_γ = zeros(length(P))
     cnt = zeros(Int, length(P))
