@@ -1,14 +1,3 @@
-"""
-    Greedy{B<:Bool}(verbose::B)}
-
-Defines the Greedy solver for Influence Maximization problems (IMPs). It can be passed to the `solve` function
-to solve an IMP.
-
-Based on the original greedy algorithm from Kempe et al. (2003).
-
-# Arguments
-- verbose::<:Bool=false: Verbose output.
-"""
 struct Greedy{B <: Bool} <: AbstractIMSolver
     verbose::B
 end

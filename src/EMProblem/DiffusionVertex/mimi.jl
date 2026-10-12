@@ -19,9 +19,10 @@ function mi(Xi::VI, Xj::VI) where {VI <: AbstractVector{<:Integer}}
     # Marginal
     px = vec(sum(pxy, dims = 2))
     py = vec(sum(pxy, dims = 1))
-    
+
     terms = zeros(2, 2)
     for a in 1:2, b in 1:2
+
         if pxy[a, b] > 0 # Work around for log(0) = -Inf
             terms[a, b] = pxy[a, b] * log(pxy[a, b] / (px[a] * py[b]))
         end
@@ -29,18 +30,15 @@ function mi(Xi::VI, Xj::VI) where {VI <: AbstractVector{<:Integer}}
     return terms, sum(terms)
 end
 
-
 function imi(Xi::VI, Xj::VI) where {VI <: AbstractVector{<:Integer}}
     mi_res, _ = mi(Xi, Xj)
     return mi_res[1, 1] + mi_res[2, 2] - abs(mi_res[2, 1]) - abs(mi_res[1, 2])
 end
 
-
 function mimi(Xi::VI, Xj::VI) where {VI <: AbstractVector{<:Integer}}
     denom = entropy(Xi) + entropy(Xj)
     return denom == 0 ? 0.0 : 2 * imi(Xi, Xj) / denom
 end
-
 
 function entropy(X::VI) where {VI <: AbstractVector{<:Integer}}
     p1 = sum(X .== 1) / length(X)

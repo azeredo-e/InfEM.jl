@@ -1,3 +1,4 @@
+@doc SOLVE_IMP_DOC
 function solve(
         im_problem::IM,
         solver::S,

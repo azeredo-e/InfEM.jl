@@ -1,7 +1,5 @@
 
-"""
-
-"""
+@doc INDEPENDENT_CASCADE_DOC
 struct IndependentCascade{
     N <: Integer,
     D <: UnivariateDistribution
@@ -13,11 +11,7 @@ function IndependentCascade(; n_iters = STD_N_ITERS, rng = Uniform(0, 1))
     IndependentCascade(n_iters, rng)
 end
 
-function run_diffusion_process(
-    g::G,
-    seed_nodes::VI,
-    diffusion_model::IndependentCascade
-) where {T, G <: AbstractGraph{T}, VI <: AbstractVector{<:Integer}}
+function run_diffusion_process(g::G,seed_nodes::VI, diffusion_model::IndependentCascade) where {T, G <: AbstractGraph{T}, VI <: AbstractVector{<:Integer}}
     n = nv(g)
     total_activated = 0
     #! This will explode really fast... Problem for future me

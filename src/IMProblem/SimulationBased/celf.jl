@@ -29,7 +29,8 @@ function lazy_forward(
         any_candidate || break
 
         fill!(cur, false) # foreach s ∈ V\A do  curs ← false
-        R_A = isempty(A) ? 0.0 : run_diffusion_process(im_problem.g, A, diffusion_model).average_spread
+        R_A = isempty(A) ? 0.0 :
+              run_diffusion_process(im_problem.g, A, diffusion_model).average_spread
         len_A = length(A)
         copyto!(tmp_seeds, 1, A, 1, len_A)
 
@@ -66,28 +67,6 @@ function lazy_forward(
     return A
 end
 
-"""
-    CELF{B <: Bool}(verbose::B = false)
-
-Defines the CELF solver for Influence Maximization problems (IMPs). It can be passed to the `solve` function
-to solve an IMP.
-
-CELF is an evolution on the *Greedy* algorithm, it treats our number `k` as a budget and allows node to have
-different costs.
-
-When running `solve` the optional `solution` field of the returned `IMSolution` will contain a `NamedTuple`
-with the following fields:
-- `winner`: The winner of the two strategies, either `:UC` or `:CB`.
-- `A_UC`: The set of seed nodes selected by the *Uniform Cost* strategy.
-- `R_UC`: The final estimated spread of the *Uniform Cost* strategy.
-- `A_CB`: The set of seed nodes selected by the *Cost Benefit* strategy.
-- `R_CB`: The final estimated spread of the *Cost Benefit* strategy.
-
-Based on the original CELF algorithm from Leskovec et al. (2007).
-
-# Arguments
-- verbose::<:Bool=false: Verbose output.
-"""
 struct CELF{B <: Bool} <: AbstractIMSolver
     verbose::B
 end

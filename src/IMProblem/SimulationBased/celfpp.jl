@@ -1,21 +1,3 @@
-
-"""
-    CELFpp{B <: Bool}(verbose::B = false)
-
-Defines the CELF++ solver for Influence Maximization problems (IMPs). It can be passed to the `solve` function
-to solve an IMP.
-
-CELF++ is an evolution on the *CELF* algorithm.
-
-When running `solve` the optional `solution` field of the returned `IMSolution` will contain a `NamedTuple`
-with the following fields:
-- lookups::<:Integer: The number of times the diffusion process was run during the execution of the algorithm.
-
-Based on the original CELF++ algorithm from Goyal et al. (2011).
-
-# Arguments
-- verbose::<:Bool=false: Verbose output.
-"""
 struct CELFpp{B <: Bool} <: AbstractIMSolver
     verbose::B
 end
@@ -24,12 +6,12 @@ function CELFpp(; verbose = false)
 end
 
 function solve(
-    im_problem::IM,
-    solver::CELFpp,
-    diffusion_model::D
+        im_problem::IM,
+        solver::CELFpp,
+        diffusion_model::D
 )::IMSolution where {
-    IM <: AbstractTraditionalIMP,
-    D <: DiffusionModels.AbstractDiffusionModel
+        IM <: AbstractTraditionalIMP,
+        D <: DiffusionModels.AbstractDiffusionModel
 }
     t0 = time()
 

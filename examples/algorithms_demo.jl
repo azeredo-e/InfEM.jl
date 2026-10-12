@@ -55,7 +55,7 @@ end;
 
 # ╔═╡ 8eae7906-7252-4ff9-9f18-cf02f78a494c
 begin
-    n = 100
+    n = 10
     g_em = erdos_renyi(n, 0.05)
     wg_em = SimpleWeightedDiGraph(g_em)
     for e in edges(wg_em)

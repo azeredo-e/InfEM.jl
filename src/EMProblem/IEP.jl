@@ -9,34 +9,28 @@ using DataStructures
 using ..DiffusionModels
 
 import ..Infem: solve
-    
+
+include("../docstrings/IE.jl")
+
+@doc ABSTRACT_IE_PROBLEM_DOC
 abstract type AbstractIEProblem end
 
-"""
-Topological based measures, such as degree, closeness, betweenness, etc.
-"""
+@doc ABSTRACT_TOPOLOGICAL_IEP_DOC
 abstract type AbstractTopologicalIEP <: AbstractIEProblem end
 
-"""
-Algorithms that are based on the result of the cascade
-"""
+@doc ABSTRACT_DIFFUSION_IEP_DOC
 abstract type AbstractDiffusionIEP <: AbstractIEProblem end
 
-"""
-For when we have G = (V, E)
-"""
+@doc ABSTRACT_DIFFUSION_COMPLETE_IEP
 abstract type AbstractDiffusionCompleteIEP <: AbstractDiffusionIEP end
 
-"""
-For when we have the set of vertices but not the edges
-"""
+@doc ABSTRACT_DIFFUSION_VERTEX_IEP
 abstract type AbstractDiffusionVertexIEP <: AbstractDiffusionIEP end
 
-
-#! Need to fix this type shenanigans before pushing to master
+@doc IE_PROBLEM_DOC
 struct IEProblem{
     T,
-    G <: AbstractGraph{T},
+    G <: AbstractGraph{T}
 } <: AbstractDiffusionVertexIEP
     g::G
     d::DiffusionResult
@@ -44,6 +38,7 @@ end
 
 abstract type AbstractIESolution end
 
+@doc IE_SOLUTION_DOC
 struct IESolution{
     T,
     G <: AbstractGraph{T},
@@ -62,14 +57,14 @@ include("DiffusionVertex/lipn.jl")
 include("DiffusionVertex/tends.jl")
 
 export
-    AbstractIEProblem,
-    AbstractTopologicalIEP,
-    AbstractDiffusionIEP,
-    AbstractDiffusionCompleteIEP,
-    AbstractDiffusionVertexIEP,
-    IEProblem,
-    AbstractIESolution,
-    IESolution,
-    LIPN
+       AbstractIEProblem,
+       AbstractTopologicalIEP,
+       AbstractDiffusionIEP,
+       AbstractDiffusionCompleteIEP,
+       AbstractDiffusionVertexIEP,
+       IEProblem,
+       AbstractIESolution,
+       IESolution,
+       LIPN
 
 end # module IEP
