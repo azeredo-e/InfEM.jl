@@ -32,7 +32,8 @@ export
        AbstractDiffusionCompleteIEP,
        AbstractDiffusionVertexIEP,
        IEProblem,
-       LIPN
+       LIPN,
+       TENDS
 export AbstractIMSolver, Greedy, CELF, CELFpp # IM models
 export IndependentCascade, LinearThreshold # Diffusion processes
 export run_diffusion_process, solve # Solve functions

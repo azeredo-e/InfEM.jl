@@ -73,7 +73,7 @@ struct LIPN{
     F <: AbstractFloat,
     N <: Number,
     I <: Integer
-} <: AbstractDiffusionVertexIEP
+} <: AbstractIEPSolver
     e_threshold::F
     em_tol::F
     em_maxiter::I
@@ -114,9 +114,9 @@ function _log_likelihood(
         incoming::Vector{Vector{Tuple{Int64, Int64}}},
         diffusion_res::BitMatrix
 )
-    n, D_n = size(diffusion_res)
+    n, D_d = size(diffusion_res)
     ll = 0.0
-    for l in 1:D_n
+    for l in 1:D_d
         for i in 1:n
             if diffusion_res[i, l] == 1
                 s_inf = 0.0
@@ -176,31 +176,15 @@ function _combined_temperature_sa(
     return x_b, -O_b
 end
 
-function _prune_threshold(mimi_vals::Vector{Float64}; maxiter = 100)
-    c = maximum(mimi_vals) / 2
-    low = falses(length(mimi_vals))
-    for _ in 1:maxiter
-        # nearer to 0 than to c
-        low_new = abs.(mimi_vals) .<= abs.(mimi_vals .- c)
-        low_new == low && break
-        low = low_new
-        high = mimi_vals[.!low]
-        isempty(high) && break
-        # update only the free centroid
-        c = sum(high) / length(high)
-    end
-    return maximum(mimi_vals[low]) # τ
-end
-
 function _e_step(
         P::Vector{Float64},
         incoming::Vector{Vector{Tuple{Int64, Int64}}},
         diffusion_res::BitMatrix
 )
-    n, D_n = size(diffusion_res)
+    n, D_d = size(diffusion_res)
     # l -> i -> [(j, k, γ), ...] :: for each neighbor of i for each diffusion
-    γ = [Dict{Int, Vector{Tuple{Int, Int, Float64}}}() for _ in 1:D_n]
-    for l in 1:D_n, i in 1:n
+    γ = [Dict{Int, Vector{Tuple{Int, Int, Float64}}}() for _ in 1:D_d]
+    for l in 1:D_d, i in 1:n
 
         diffusion_res[i, l] == 1 || continue
         prod_q = 1.0
@@ -221,12 +205,12 @@ end
 function _m_step(
         γ::Vector{Dict{Int, Vector{Tuple{Int, Int, Float64}}}},
         P::Vector{Float64},
-        D_n::Integer
+        D_d::Integer
 )
     sum_γ = zeros(length(P))
     cnt = zeros(Int, length(P))
 
-    for l in 1:D_n
+    for l in 1:D_d
         for (i, entries) in γ[l]
             for (j, k, γ) in entries
                 sum_γ[k] += γ # Numerator
@@ -237,26 +221,26 @@ function _m_step(
 
     P_new = similar(P)
     for k in eachindex(P)
-        D_minus = β - cnt[k] # Diffusion where i wasnt activated
+        D_minus = D_d - cnt[k] # Diffusion where i wasnt activated
         P_new[k] = sum_γ[k] / (sum_γ[k] + D_minus)
     end
     return P_new
 end
 
-function solve(ie_problem::IEP, solver::LIPN) where {IEP <: AbstractDiffusionVertexIEP}
+function solve(ie_problem::IEProblem, solver::LIPN)::IESolution
     t0 = time()
     diffusion_res = reduce(hcat, ie_problem.d.diffusion_history) # Each column is the result of some diffusion process
-    n, D_n = size(diffusion_res)
+    n, D_d = size(diffusion_res)
 
-    # Prunning process, remove lesse likely edges based on the MIMI measure
+    # Pruning process, remove lesse likely edges based on the MIMI measure
     pairs = [(i, j) for i in 1:n for j in (i + 1):n] # upper-triangle pairs only, computed once
     vals = Vector{Float64}(undef, length(pairs))
 
     @views for (k, (i, j)) in enumerate(pairs)
         vals[k] = mimi(diffusion_res[i, :], diffusion_res[j, :])
     end
-    τ = _prune_threshold(vals)
-    candidates = pairs[vals .>= τ] # Vector of tuples (edges (v, u)) that survived the prunning
+    τ = _prune_threshold(vals) # utils.jl
+    candidates = pairs[vals .>= τ] # Vector of tuples (possible edges (v, u)) that survived the pruning
 
     # Initial probabilities, LIPN assumes all connections are bidirectional
     directed = Vector{Tuple{Int, Int}}(undef, 2 * length(candidates))
@@ -281,10 +265,10 @@ function solve(ie_problem::IEP, solver::LIPN) where {IEP <: AbstractDiffusionVer
     epoch = 0
     while (solver.em_maxiter < epoch)
         γ_hat = _e_step(P_edges, incoming, diffusion_res)
-        P_new = _m_step(γ_hat, P_edges, D_n)
+        P_new = _m_step(γ_hat, P_edges, D_d)
         # Work around so that we dont get log(0) when calculating the log-likelihood for the SA algorithm
         P_new .= clamp.(P_new, 1e-9, 1 - 1e-9)
-        maximum(abs.(P_new .- P)) < tol && break
+        maximum(abs.(P_new .- P_edges)) < solver.em_tol && break
         P_edges = P_new
         epoch += 1
     end

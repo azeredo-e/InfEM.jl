@@ -55,13 +55,19 @@ end;
 
 # ╔═╡ 8eae7906-7252-4ff9-9f18-cf02f78a494c
 begin
-    n = 10
+    n = 100
     g_em = erdos_renyi(n, 0.05)
     wg_em = SimpleWeightedDiGraph(g_em)
     for e in edges(wg_em)
         src, dst = Graphs.src(e), Graphs.dst(e)
         wg_em.weights[src, dst] = Normal(0.3, 0.05) |> rand
     end
+end
+
+# ╔═╡ ca99eca0-375c-497f-bd6d-79f877ab8ce3
+begin
+    ic_em = IndependentCascade(n_iters=40)
+    ic_em_res = run_diffusion_process(wg_em, sample(1:n, 5), ic_em)
 end
 
 # ╔═╡ 09fdf7e8-29de-45a4-8181-4f6d56b981a3
@@ -77,12 +83,6 @@ md"""
 ### LIPN
 """
 
-# ╔═╡ ca99eca0-375c-497f-bd6d-79f877ab8ce3
-begin
-    ic_em = IndependentCascade(n_iters=40)
-    ic_em_res = run_diffusion_process(wg_em, sample(1:n, 5), ic_em)
-end
-
 # ╔═╡ 0664844d-2396-490b-b898-70e8c2135643
 begin
     iep_lipn = IEProblem(g_em, ic_em_res)
@@ -91,6 +91,20 @@ end
 
 # ╔═╡ 99027bf5-4f13-4706-9a15-753572456771
 solve(iep_lipn, lipn)
+
+# ╔═╡ 1e4cdef4-6694-465a-9c76-6539bbb7c074
+md"""
+### TENDS
+"""
+
+# ╔═╡ d9fb1ed0-a0ef-45d7-86b7-034e4713b1e0
+begin
+    iep_tends = IEProblem(g_em, ic_em_res)
+    tends = TENDS()
+end
+
+# ╔═╡ 781929ad-ffb1-4359-9615-19c5437e0d4d
+solve(iep_tends, tends)
 
 # ╔═╡ e432577b-4640-4c52-88d9-08494d8a14a7
 md"""
@@ -1811,12 +1825,15 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╠═6e735ba2-6fde-48a1-be72-76425f058821
 # ╟─f996cbad-56a4-43c9-8b99-010b12609a70
 # ╠═8eae7906-7252-4ff9-9f18-cf02f78a494c
+# ╠═ca99eca0-375c-497f-bd6d-79f877ab8ce3
 # ╠═09fdf7e8-29de-45a4-8181-4f6d56b981a3
 # ╟─cf2b9dee-7255-4664-ac2c-4ef86aabf240
 # ╟─ef9b3158-701b-4348-b93a-2182ca8f12be
-# ╠═ca99eca0-375c-497f-bd6d-79f877ab8ce3
 # ╠═0664844d-2396-490b-b898-70e8c2135643
 # ╠═99027bf5-4f13-4706-9a15-753572456771
+# ╟─1e4cdef4-6694-465a-9c76-6539bbb7c074
+# ╠═d9fb1ed0-a0ef-45d7-86b7-034e4713b1e0
+# ╠═781929ad-ffb1-4359-9615-19c5437e0d4d
 # ╟─e432577b-4640-4c52-88d9-08494d8a14a7
 # ╠═dde5a596-84e5-4914-ae4b-881e64a41a50
 # ╠═fb5f7063-4cec-4b7f-941d-be6d09c822f3

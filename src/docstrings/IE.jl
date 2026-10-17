@@ -20,6 +20,10 @@ const ABSTRACT_DIFFUSION_VERTEX_IEP = """
 Basic interface for IE algorithms when we have the set of vertices but not the edges and our aim is to estimate both.
 """
 
+const ABSTRACT_IEP_SOLVER_DOC = """
+Basic interface for IE solver algorithms.
+"""
+
 ### SOLUTIONS AND PROBLEM TYPES DEFINITIONS ###
 
 const IE_PROBLEM_DOC = """
@@ -76,3 +80,5 @@ Based on the original LIPN algorithm from Wang et al. (2025).
 - `sa_temp_decay::Number=8`: Temperature decays in each step of the SA algorithm.
 - `verbose::Bool=false`: Verbose output.
 """
+
+const TENDS_DOC = """"""

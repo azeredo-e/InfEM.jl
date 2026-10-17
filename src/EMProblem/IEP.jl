@@ -31,10 +31,13 @@ abstract type AbstractDiffusionVertexIEP <: AbstractDiffusionIEP end
 struct IEProblem{
     T,
     G <: AbstractGraph{T}
-} <: AbstractDiffusionVertexIEP
+} <: AbstractIEProblem
     g::G
     d::DiffusionResult
 end
+
+@doc ABSTRACT_IEP_SOLVER_DOC
+abstract type AbstractIEPSolver end
 
 abstract type AbstractIESolution end
 
@@ -50,6 +53,8 @@ struct IESolution{
     time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}}
 end
 
+include("utils.jl")
+include("DiffusionVertex/utils.jl")
 # include("Topological/degree.jl")
 # include("DiffusionComplete/")
 include("DiffusionVertex/mimi.jl")
@@ -65,6 +70,7 @@ export
        IEProblem,
        AbstractIESolution,
        IESolution,
-       LIPN
+       LIPN,
+       TENDS
 
 end # module IEP
