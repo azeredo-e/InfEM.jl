@@ -1,4 +1,4 @@
-### ABSTRACT TYPES DEFINITIONS ### 
+### ABSTRACT TYPES DEFINITIONS ###
 
 const ABSTRACT_DIFFUSION_MODEL_DOC = """
 Defines the interface for diffusion models.
@@ -16,9 +16,9 @@ const DIFFUSION_RESULT_DOC = """
 Represents the result of a diffusion process. It contains the history of activated nodes at each iteration.
 
 # Fields
-`diffusion_history::Vector{BitVector}`: A vector with each entry containing a `BitVector` where each of its entries
+- `diffusion_history::Vector{BitVector}`: A vector with each entry containing a `BitVector` where each of its entries
     represent the state of that node on that specific diffusion, 0 for inactive and 1 for active.
-`average_spread::AbstractFloat`: The average spread of the network through all runs of diffusions.
+- `average_spread::AbstractFloat`: The average spread of the network through all runs of diffusions.
 """
 
 ### ALGORITHMS DEFINITIONS ###
@@ -30,7 +30,7 @@ Independent Cascade diffusion model.
 
 Originally an epidemiological model, it has been adapted to be used in the IM and IE scenario. It considers
 influence as a stochastic problem. Nodes, given their neighbors "stubbornes", have a chance to influence
-other nodes following a random trial based on a probability distribution.  
+other nodes following a random trial based on a probability distribution.
 Each time step, for each edge, a random trial is run, if succeded the receiving node will be from now on
 conisidered active, and, on the next step, passible of influencing its neighbors.
 
