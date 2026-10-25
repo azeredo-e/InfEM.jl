@@ -9,6 +9,9 @@ using Distributions
 using Graphs
 using SimpleWeightedGraphs
 using DataStructures
+using SparseArrays
+using SpecialFunctions: loggamma
+
 
 const STD_N_ITERS = 10_000
 
@@ -21,20 +24,14 @@ using .DiffusionModels
 using .IMP
 using .IEP
 
-export # Problem and solution definitions
-       IMProblem,
-       AbstractIMProblem,
-       AbstractTraditionalIMP
+export AbstractIMProblem, AbstractTraditionalIMP, IMProblem
 export
        AbstractIEProblem,
-       AbstractTopologicalIEP,
-       AbstractDiffusionIEP,
-       AbstractDiffusionCompleteIEP,
-       AbstractDiffusionVertexIEP,
        IEProblem,
        LIPN,
+       NetRate,
        TENDS
-export AbstractIMSolver, Greedy, CELF, CELFpp # IM models
+export AbstractIMSolver, CELF, CELFpp, Greedy # IM models
 export IndependentCascade, LinearThreshold # Diffusion processes
 export run_diffusion_process, solve # Solve functions
 

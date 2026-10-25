@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v1.0.3
+# v1.0.4
 
 using Markdown
 using InteractiveUtils
@@ -68,6 +68,9 @@ end
 begin
     ic_em = IndependentCascade(n_iters=40)
     ic_em_res = run_diffusion_process(wg_em, sample(1:n, 5), ic_em)
+
+    ic_em_timed = IndependentCascade(n_iters=40, history = Infem.TimedCascade())
+    ic_em_res_timed = run_diffusion_process(wg_em, sample(1:n, 5), ic_em_timed)
 end
 
 # ╔═╡ 09fdf7e8-29de-45a4-8181-4f6d56b981a3
@@ -84,13 +87,19 @@ md"""
 """
 
 # ╔═╡ 0664844d-2396-490b-b898-70e8c2135643
+# ╠═╡ disabled = true
+#=╠═╡
 begin
     iep_lipn = IEProblem(g_em, ic_em_res)
     lipn = LIPN()
 end
+  ╠═╡ =#
 
 # ╔═╡ 99027bf5-4f13-4706-9a15-753572456771
+# ╠═╡ disabled = true
+#=╠═╡
 solve(iep_lipn, lipn)
+  ╠═╡ =#
 
 # ╔═╡ 1e4cdef4-6694-465a-9c76-6539bbb7c074
 md"""
@@ -98,13 +107,33 @@ md"""
 """
 
 # ╔═╡ d9fb1ed0-a0ef-45d7-86b7-034e4713b1e0
+# ╠═╡ disabled = true
+#=╠═╡
 begin
     iep_tends = IEProblem(g_em, ic_em_res)
     tends = TENDS()
 end
+  ╠═╡ =#
 
 # ╔═╡ 781929ad-ffb1-4359-9615-19c5437e0d4d
+# ╠═╡ disabled = true
+#=╠═╡
 solve(iep_tends, tends)
+  ╠═╡ =#
+
+# ╔═╡ 6ba24241-00ec-4bab-ba2c-83640204de58
+md"""
+### NetRate
+"""
+
+# ╔═╡ e46f1a36-1f2d-4259-a869-4c932f7bd75d
+begin
+    iep_netrate = IEProblem(g_em, ic_em_res_timed)
+    netrate = NetRate()
+end
+
+# ╔═╡ 5b52fa4b-177b-4b71-9241-0863558901f2
+solve(iep_netrate, netrate)
 
 # ╔═╡ e432577b-4640-4c52-88d9-08494d8a14a7
 md"""
@@ -228,7 +257,7 @@ SimpleWeightedGraphs = "~1.5.1"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.13.1"
+julia_version = "1.13.2"
 manifest_format = "2.1"
 project_hash = "5b9c9ff688952e97c4574986bf97a89e55196277"
 
@@ -805,7 +834,7 @@ version = "1.0.0"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "Zlib_jll", "Zstd_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.18.0+1"
+version = "8.22.0+0"
 
 [[deps.LibGit2]]
 deps = ["LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
@@ -815,7 +844,7 @@ version = "1.11.0"
 [[deps.LibGit2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "LibSSH2_jll", "Libdl", "OpenSSL_jll", "PCRE2_jll", "Zlib_jll"]
 uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.9.1+0"
+version = "1.9.7+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl", "OpenSSL_jll", "Zlib_jll"]
@@ -1006,7 +1035,7 @@ version = "1.6.1"
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.5.6+0"
+version = "3.5.8+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl"]
@@ -1680,7 +1709,7 @@ version = "1.6.0+0"
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.3.1+2"
+version = "1.3.2+0"
 
 [[deps.Zstd_jll]]
 deps = ["CompilerSupportLibraries_jll", "Libdl"]
@@ -1786,12 +1815,12 @@ version = "1.1.7+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.67.1+0"
+version = "1.70.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
-version = "17.8.2+0"
+version = "17.8.3+0"
 
 [[deps.x264_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1834,6 +1863,9 @@ uuid = "23338594-aafe-5451-b93e-139f81909106"
 # ╟─1e4cdef4-6694-465a-9c76-6539bbb7c074
 # ╠═d9fb1ed0-a0ef-45d7-86b7-034e4713b1e0
 # ╠═781929ad-ffb1-4359-9615-19c5437e0d4d
+# ╟─6ba24241-00ec-4bab-ba2c-83640204de58
+# ╠═e46f1a36-1f2d-4259-a869-4c932f7bd75d
+# ╠═5b52fa4b-177b-4b71-9241-0863558901f2
 # ╟─e432577b-4640-4c52-88d9-08494d8a14a7
 # ╠═dde5a596-84e5-4914-ae4b-881e64a41a50
 # ╠═fb5f7063-4cec-4b7f-941d-be6d09c822f3

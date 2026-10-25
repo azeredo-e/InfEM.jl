@@ -5,6 +5,9 @@ using Distributions
 using Printf
 using Random
 using DataStructures
+using SparseArrays
+using SpecialFunctions: loggamma
+# using Optim
 
 using ..DiffusionModels
 
@@ -14,18 +17,6 @@ include("../docstrings/IE.jl")
 
 @doc ABSTRACT_IE_PROBLEM_DOC
 abstract type AbstractIEProblem end
-
-@doc ABSTRACT_TOPOLOGICAL_IEP_DOC
-abstract type AbstractTopologicalIEP <: AbstractIEProblem end
-
-@doc ABSTRACT_DIFFUSION_IEP_DOC
-abstract type AbstractDiffusionIEP <: AbstractIEProblem end
-
-@doc ABSTRACT_DIFFUSION_COMPLETE_IEP
-abstract type AbstractDiffusionCompleteIEP <: AbstractDiffusionIEP end
-
-@doc ABSTRACT_DIFFUSION_VERTEX_IEP
-abstract type AbstractDiffusionVertexIEP <: AbstractDiffusionIEP end
 
 @doc IE_PROBLEM_DOC
 struct IEProblem{
@@ -45,10 +36,11 @@ abstract type AbstractIESolution end
 struct IESolution{
     T,
     G <: AbstractGraph{T},
+    H <: AbstractVector{<:AbstractVector},
     F <: AbstractFloat
 } <: AbstractIESolution
     g::G
-    d::DiffusionResult{F}
+    d::DiffusionResult{H, F}
     ret::Any
     time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}}
 end
@@ -56,21 +48,20 @@ end
 include("utils.jl")
 include("DiffusionVertex/utils.jl")
 # include("Topological/degree.jl")
-# include("DiffusionComplete/")
+include("DiffusionComplete/netrate.jl")
+# include("DiffusionComplete/dings.jl")
 include("DiffusionVertex/mimi.jl")
 include("DiffusionVertex/lipn.jl")
 include("DiffusionVertex/tends.jl")
 
 export
-       AbstractIEProblem,
-       AbstractTopologicalIEP,
-       AbstractDiffusionIEP,
-       AbstractDiffusionCompleteIEP,
-       AbstractDiffusionVertexIEP,
-       IEProblem,
-       AbstractIESolution,
-       IESolution,
-       LIPN,
-       TENDS
+    AbstractIEProblem,
+    AbstractIESolution,
+    IEProblem,
+    IESolution,
+    LIPN,
+    NetRate,
+    TENDS
+export AbstractTransmissionModel, Exponential, PowerLaw, Rayleigh
 
 end # module IEP

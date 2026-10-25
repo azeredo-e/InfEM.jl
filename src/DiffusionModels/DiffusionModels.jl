@@ -13,13 +13,14 @@ abstract type AbstractDiffusionProcessResult end
 
 @doc DIFFUSION_RESULT_DOC
 struct DiffusionResult{
+    H <: AbstractVector{<:AbstractVector},
     F <: AbstractFloat
 } <: AbstractDiffusionProcessResult
-    diffusion_history::Vector{BitVector}
+    diffusion_history::H
     average_spread::F
 end
-function DiffusionResult(; diffusion_history::Vector{BitVector})
-    DiffusionResult(diffusion_history, 0.0)
+function DiffusionResult(; diffusion_history::AbstractVector{<:AbstractVector})
+    return DiffusionResult(diffusion_history, 0.0)
 end
 
 include("independent_cascade.jl")
@@ -30,6 +31,6 @@ export
        DiffusionResult,
        IndependentCascade,
        LinearThreshold,
-       run_diffusion_process
+       run_diffusion_process, FinalStatus, TimedCascade
 
 end # module DiffusionModels

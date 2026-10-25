@@ -47,7 +47,7 @@ struct IMSolution{
 } <: AbstractIMSolution
     g::G
     k::I
-    diffusion_model::DiffusionModels.AbstractDiffusionModel
+    diffusion_model::AbstractDiffusionModel
     S::VI
     spread::F
     time::NamedTuple{(:start, :end, :elapsed), Tuple{F, F, F}}
@@ -64,14 +64,14 @@ include("SimulationBased/celf.jl")
 include("SimulationBased/celfpp.jl")
 
 export
-       IMProblem,
-       AbstractIMProblem,
-       AbstractTraditionalIMP,
-       AbstractIMSolution,
-       IMSolution,
-       AbstractIMSolver,
-       Greedy,
-       CELF,
-       CELFpp
+    AbstractIMProblem,
+    AbstractIMSolution,
+    AbstractIMSolver,
+    AbstractTraditionalIMP,
+    CELF,
+    CELFpp,
+    Greedy,
+    IMProblem,
+    IMSolution
 
 end # module IMP

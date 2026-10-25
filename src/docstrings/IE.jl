@@ -1,23 +1,7 @@
-### ABSTRACT TYPES DEFINITIONS ### 
+### ABSTRACT TYPES DEFINITIONS ###
 
 const ABSTRACT_IE_PROBLEM_DOC = """
 Defines the interface for Influence Estimation Problems (IMPs).
-"""
-
-const ABSTRACT_TOPOLOGICAL_IEP_DOC = """
-Basic interface for topological based measures, such as degree, closeness, betweenness, etc.
-"""
-
-const ABSTRACT_DIFFUSION_IEP_DOC = """
-Basic interface for IE algorithms that build weights or edges based on the results of the cascades.
-"""
-
-const ABSTRACT_DIFFUSION_COMPLETE_IEP = """
-Basic interface for IE algorithms when we have both the set of vertices and edges and are just estimating the weights.
-"""
-
-const ABSTRACT_DIFFUSION_VERTEX_IEP = """
-Basic interface for IE algorithms when we have the set of vertices but not the edges and our aim is to estimate both.
 """
 
 const ABSTRACT_IEP_SOLVER_DOC = """
@@ -70,7 +54,7 @@ Based on the original LIPN algorithm from Wang et al. (2025).
 
 # Fields
 - `e_threshold::AbstractFloat=0.5`: Since LIPN is a probabilistic model, this parameter sets the threshohold for
-    which edges to keep. 
+    which edges to keep.
 - `em_tol::AbstractFloat=1e-6`: Stopping crieteria for convergence in the EM algorithm.
 - `em_maxiter::Integer=100`: Max number of iteration for the EM algorithm.
 - `sa_temp_ini::Number=100`: Initial temperature for the SA algorithm used for tuning the final result and ensure
